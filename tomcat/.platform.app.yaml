@@ -1,0 +1,68 @@
+name: tomcat
+type: java:8
+disk: 2048
+mounts:
+  "/workdir": "shared:files/workdir"
+  "/webapps": "shared:files/webapps"
+  "/conf/Catalina/localhost": "shared:files/conf"
+  "/logs": "shared:files/logs"
+  "/db": "shared:files/db"
+  "/storage": "shared:files/storage"
+web:
+  commands:
+    start: ./bin/catalina.sh run
+hooks:
+  build: |
+    set -e
+
+    # Download tomcat
+    TOMCAT_VERSION=8.5.37
+    if [ ! -d "$PLATFORM_CACHE_DIR"/apache-tomcat-"$TOMCAT_VERSION" ]; then
+      echo "Downloading Apache Tomcat ${TOMCAT_VERSION}..."
+      (
+        cd "$PLATFORM_CACHE_DIR"
+        curl -O https://www-eu.apache.org/dist/tomcat/tomcat-8/v"$TOMCAT_VERSION"/bin/apache-tomcat-"$TOMCAT_VERSION".tar.gz
+        sha512sum -c "$PLATFORM_APP_DIR"/tomcat.sum
+        tar xf apache-tomcat-"$TOMCAT_VERSION".tar.gz
+        rm -f apache-tomcat-"$TOMCAT_VERSION".tar.gz
+      )
+    else
+      echo "Using cached archive of Apache Tomcat ${TOMCAT_VERSION}..."
+    fi
+
+    # "Install" it
+    echo "Installing archive of Apache Tomcat ${TOMCAT_VERSION}..."
+    cp -R "$PLATFORM_CACHE_DIR"/apache-tomcat-"$TOMCAT_VERSION"/* .
+
+    echo "Applying Platform.sh configuration..."
+
+    # Remove the unnecessary default webapps
+    (cd webapps && rm -rf docs examples ROOT)
+
+    # Use our custom configuration
+    # This defines the custom HTTP port and workdir.
+    cp server.xml conf/
+    # This defines the admin user used by the webapp's deploy hook to
+    # deploy itself in tomcat.
+    cp tomcat-users.xml conf/
+    cp context.xml conf/
+
+    wget https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-8.0.15.tar.gz
+    tar xzf mysql-connector-java-8.0.15.tar.gz
+    mv mysql-connector-java-8.0.15/mysql-connector-java-8.0.15.jar lib/
+    rm -rf mysql-connector-java-8.0.15
+    rm -f mysql-connector-java-8.0.15.tar.gz
+
+    # Define the password that the application will use to deploy
+    sed -i "s/PLATFORM_PROJECT_ENTROPY/$PLATFORM_PROJECT_ENTROPY/" conf/tomcat-users.xml
+
+    # The webapps/ folder will be a read-write mount, but we need the
+    # default webapps like manager, so copy them out and the deploy 
+    # hook will put them back in the mount.
+    mv webapps webapps.init
+  deploy: |
+    cp -R webapps.init/* webapps/
+
+relationships:
+  database: "mysql:mysql"
+  solr: "solr4:solr"

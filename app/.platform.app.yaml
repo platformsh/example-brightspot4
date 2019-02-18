@@ -1,0 +1,38 @@
+name: app
+type: java:8
+disk: 128
+size: S
+hooks:
+  build: |
+    # What we are doing here is downloading all the dependencies
+    # first, to make sure the deploy hook is not going to need
+    # downloading anything to work. That means we need to put the
+    # maven repository in the application slug. However, that means we
+    # can't reuse the project cache. So the trick is to use the
+    # project cache by default, and copy paste it into the application
+    # slug.
+
+    # Debug dependency tree
+    mvn -X dependency:tree
+
+    mvn dependency:go-offline
+    mvn package
+
+    mkdir -p .m2/
+    # We should provide that folder in an environment variable.
+    cp -R /mnt/cache/maven .m2/repository
+
+  deploy: |
+    # Make sure we are using the local repository.
+    export MAVEN_OPTS="-Dmaven.repo.local=$PLATFORM_APP_DIR/.m2/repository"
+
+    mvn \
+      --offline \
+      -Dtomcat.username=admin \
+      -Dtomcat.password=$PLATFORM_PROJECT_ENTROPY \
+      -Dmaven.tomcat.url=$(./tomcat-url)/manager/text \
+      tomcat7:redeploy-only
+
+relationships:
+  tomcat: tomcat:http
+  database: "mysql:mysql"

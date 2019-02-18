@@ -1,0 +1,57 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context allowLinking="true" crossContext="true">
+
+    <Resources cachingAllowed="false" />
+    <Environment name="PRODUCTION" type="java.lang.Boolean" value="false" />
+
+    <!-- CMS Login Control -->
+    <Environment name="cms/tool/isAutoCreateUser" override="true" type="java.lang.Boolean" value="true" />
+    <Environment name="cookieSecret" type="java.lang.String" value="Deem2oenoot1Ree5veinu8" override="true" />
+
+    <!-- Default Database -->
+    
+    <Environment name="dari/defaultDatabase" type="java.lang.String" value="main" override="false" />
+    <Environment name="dari/database/main/class" override="false" type="java.lang.String" value="com.psddev.dari.db.AggregateDatabase" />
+    <Environment name="dari/database/main/defaultDelegate" override="false" type="java.lang.String" value="sql" />
+    <Environment name="dari/database/main/delegate/sql/class" override="false" type="java.lang.String" value="com.psddev.dari.db.SqlDatabase" />
+
+    <Environment name="dari/database/main/delegate/solr/class" type="java.lang.String" value="com.psddev.dari.db.SolrDatabase"/>
+    <Environment name="dari/database/main/delegate/solr/serverUrl" type="java.lang.String" value="http://solr.internal:8080/solr/collection1"/>
+
+    <Resource name="dari/database/main/delegate/sql/dataSource"
+    auth="Container" driverClassName="com.mysql.jdbc.Driver"
+    logAbandoned="true" maxActive="100" maxIdle="30" maxWait="10000"
+    type="javax.sql.DataSource"
+    removeAbandoned="true" removeAbandonedTimeout="60"
+    username="user" password=""
+    url="jdbc:mysql://database.internal:3306/main"
+    testOnBorrow="true" validationQuery="SELECT 1"/>
+    
+
+    <!-- Database
+    <Environment name="dari/defaultDatabase" type="java.lang.String" value="main" />
+    <Environment name="dari/database/main/class" type="java.lang.String" value="com.psddev.dari.h2.H2Database" />
+    <Environment name="dari/database/main/dataSource/class" type="java.lang.String" value="org.h2.jdbcx.JdbcDataSource" />
+    <Environment name="dari/database/main/dataSource/url" type="java.lang.String" value="jdbc:h2:/app/db/h2" />
+    <Environment name="dari/database/main/dataSource/user" type="java.lang.String" value="root" />
+    <Environment name="dari/database/main/dataSource/password" type="java.lang.String" value="" />
+     -->
+    
+    <Environment name="dari/routingFilter/applicationPath/cms" type="java.lang.String" value="/cms/" override="false" />
+
+
+
+    <!-- Solr Config 
+    <Environment name="solr/home" override="false" type="java.lang.String" value="/TOMCAT_PATH/solr" />
+    <Environment name="dari/database/main/delegate/solr/groups" override="false" type="java.lang.String" value="-* +cms.content.searchable" />
+    <Environment name="dari/database/main/delegate/solr/class" override="false" type="java.lang.String" value="com.psddev.dari.db.SolrDatabase" />
+    <Environment name="dari/database/main/delegate/solr/serverUrl" override="false" type="java.lang.String" value="http://localhost:8080/solr" />-->
+
+
+    <!-- Storage -->
+    <Environment name="dari/defaultStorage" type="java.lang.String" value="main" />
+    <Environment name="dari/storage/main/class" type="java.lang.String" value="com.psddev.dari.util.LocalStorageItem" />
+    <Environment name="dari/storage/main/baseUrl" type="java.lang.String" value="/storage" />
+    <Environment name="dari/storage/main/rootPath" type="java.lang.String" value="/app/storage" />
+
+</Context>
