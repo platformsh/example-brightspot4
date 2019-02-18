@@ -12,6 +12,8 @@ hooks:
     # project cache by default, and copy paste it into the application
     # slug.
 
+    npm install
+
     # Debug dependency tree
     mvn -X dependency:tree
 
@@ -35,4 +37,3 @@ hooks:
 
 relationships:
   tomcat: tomcat:http
-  database: "mysql:mysql"
